@@ -1,0 +1,124 @@
+---
+title: "Num calls"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyr)
+library(scales)
+library(ggpubr)
+library(ggplot2)
+
+knitr::opts_chunk$set(
+	echo = FALSE,
+	fig.path = "figs/",
+	warning = FALSE,
+	info = FALSE
+)
+```
+
+# Num individuals covered at each site
+```{r 2}
+plotList <- list()
+families <- c('M013', 'M047', 'M173', 'P008', 'P016', 'P033', 'P034')
+thresholds <- c(60, 45, 45, 13, 30, 40, 40)
+for (i in 1:7) {
+  file <- paste('tmp', families[i], 'site_stats', sep = '/')
+  data <- read.table(file, sep = "\t", header = FALSE)
+  quantiles = quantile(data$V1, c(0.25, 0.40, 0.50))
+  plotList[[(i)]] <- ggplot(data, aes(x = V1)) + 
+    scale_x_continuous(name = NULL) + 
+    scale_y_continuous(name = NULL) + 
+    geom_histogram(binwidth = 1) + 
+    ggtitle('') + theme_bw() +
+    geom_vline(xintercept = thresholds[i])
+}
+
+figure <- ggarrange(plotlist = plotList,
+                    nrow = 2, ncol = 4, labels = families)
+
+annotate_figure(figure,
+                bottom = text_grob("Number of individuals covered"),
+                left = text_grob("Count of sites", rot = 90))
+```
+
+# Mean-DP distribution
+```{r 4}
+plotList <- list()
+families <- c('M013', 'M047', 'M173', 'P008', 'P016', 'P033', 'P034')
+thresholds <- c(8, 7, 7, 5, 8, 6, 7)
+for (i in 1:7) {
+  file <- paste('tmp', families[i], 'site_stats', sep = '/')
+  data <- read.table(file, sep = "\t", header = FALSE)
+
+  plotList[[(i)]] <- ggplot(subset(data, V2 < 30), aes(x = V2)) +
+    scale_x_continuous(name = NULL, breaks = c(2,6,10), limits = c(0,10)) +
+    scale_y_continuous(name = NULL) +
+    geom_histogram(binwidth = 1) + 
+    ggtitle('') + theme_bw() +
+    geom_vline(xintercept = thresholds[i])
+
+}
+
+figure <- ggarrange(plotlist = plotList,
+                    nrow = 2, ncol = 4, labels = families)
+
+annotate_figure(figure,
+                bottom = text_grob("Mean genotype depth"),
+                left = text_grob("Count of sites", rot = 90))
+```
+
+# Mean-GQ distribution
+```{r 4}
+plotList <- list()
+families <- c('M013', 'M047', 'M173', 'P008', 'P016', 'P033', 'P034')
+thresholds <- c(26, 24, 28, 18, 23, 28, 20)
+for (i in 1:7) {
+  file <- paste('tmp', families[i], 'site_stats', sep = '/')
+  data <- read.table(file, sep = "\t", header = FALSE)
+
+  quantiles = quantile(data$V3, c(0.05, 0.10, 0.15, 0.20, 0.25))
+  plotList[[(i)]] <- ggplot(data, aes(x = V3)) +
+    scale_x_continuous(name = NULL, breaks = c(15, 20, 25, 30, 35), limits = c(13,40)) +
+    scale_y_continuous(name = NULL) +
+    geom_histogram(binwidth = 1) +
+    ggtitle('') + theme_bw() +
+    geom_vline(xintercept = thresholds[i])
+}
+
+figure <- ggarrange(plotlist = plotList,
+                    nrow = 2, ncol = 4, labels = families)
+
+annotate_figure(figure,
+                bottom = text_grob("Mean genotype quality"),
+                left = text_grob("Count of sites", rot = 90))
+```
+
+
+# MAF per site
+```{r 3}
+plotList <- list()
+families <- c('M013', 'M047', 'M173', 'P008', 'P016', 'P033', 'P034')
+thresholds <- c(0.38, 0.38, 0.08, 0.20, 0.08, 0.10, 0.38)
+for (i in 1:7) {
+  file <- paste('tmp', families[i], 'site_stats', sep = '/')
+  data <- read.table(file, sep = "\t", header = FALSE)
+
+  quantiles = quantile(data$V4, c(0.10, 0.15, 0.25, 0.50))
+  plotList[[(i)]] <- ggplot(data, aes(x = V4)) +
+    scale_x_continuous(name = NULL, breaks = seq(0.1, 0.5, 0.1)) +
+    scale_y_continuous(name = NULL) +
+    geom_histogram(binwidth = 0.01) +
+    ggtitle('') + theme_bw() +
+    geom_vline(xintercept = thresholds[i])
+}
+
+figure <- ggarrange(plotlist = plotList,
+                    nrow = 2, ncol = 4, labels = families)
+
+annotate_figure(figure,
+                bottom = text_grob("Minor allele frequency"),
+                left = text_grob("Count of sites", rot = 90))
+```
+

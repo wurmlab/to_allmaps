@@ -1,0 +1,114 @@
+---
+title: "Num calls"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyr)
+library(scales)
+library(ggpubr)
+library(ggplot2)
+
+plotList <- function(filenames) {
+  plots <- list()
+  for (i in 1:length(filenames)) {
+      data <- read.table(filenames[[i]], sep = "\t", header = FALSE)
+      plots[[i]] <- ggplot(data, aes(x = V2, y = V3)) + geom_point() +
+        geom_smooth(method = 'lm', formula = y ~ x + 0) +
+        scale_y_continuous(name = NULL) +
+        scale_x_continuous(name = NULL) +
+        ggtitle('') + theme_bw()
+  }
+  plots
+}
+
+plotList2 <- function(filenames) {
+  plots <- list()
+  for (i in 1:length(filenames)) {
+      data <- read.table(filenames[[i]], sep = "\t", header = FALSE)
+      data$V4 = rstandard(lm(V3 ~ V2 + 0, data = data))
+      plots[[i]] <- ggplot(data, aes(x = V2, y = V4)) + geom_point() +
+        scale_y_continuous(name = 'Percent homozygous sites') +
+        scale_x_continuous(name = 'Percent called sites') +
+        geom_abline(intercept = 0, slope = 0) +
+        geom_hline(yintercept = -1.96) +
+        ggtitle('') + theme_bw()
+  }
+  plots
+}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, info = FALSE, fig.path = 'figs/')
+```
+
+# Before filtering
+```{r 1}
+plotlist = plotList(c(
+  paste('tmp', 'M013', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'M047', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'M173', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P008', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P016', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P033', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P034', 'populations.snps.vcf.calls.tsv', sep = '/')
+))
+
+figure <- ggarrange(plotlist = plotlist, nrow = 2, ncol = 4,
+          labels = c('M013', 'M047', 'M173', 'P008', 'P016', 'P033', 'P034'))
+
+annotate_figure(figure,
+                bottom = text_grob("Percent called sites"),
+                left = text_grob("Percent homozygous sites", rot = 90))
+```
+
+```{r 2}
+plotList2(c(
+  paste('tmp', 'M013', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'M047', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'M173', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P008', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P016', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P033', 'populations.snps.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P034', 'populations.snps.vcf.calls.tsv', sep = '/')
+))
+```
+
+```{r 3}
+plotList <- list()
+families <- c('M013', 'M047', 'M173', 'P008', 'P016', 'P033', 'P034')
+for (i in 1:7) {
+  file <- paste('tmp', families[i], 'populations.snps.vcf.calls.tsv', sep = '/')
+  data <- read.table(file, sep = "\t", header = FALSE)
+
+  plotList[[(i)]] <- ggplot(data = data, aes(x = V2)) +
+    scale_x_continuous(name = "Fraction called") +
+    geom_histogram(binwidth = 0.1)
+}
+
+plotList
+```
+
+# After filtering
+```{r 3}
+plotList(c(
+  paste('tmp', 'M013', 'remove_outliers.1.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'M047', 'remove_outliers.3.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'M173', 'remove_outliers.4.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P008', 'remove_outliers.6.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P016', 'remove_outliers.1.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P033', 'remove_outliers.3.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P034', 'remove_outliers.4.vcf.calls.tsv', sep = '/')
+))
+```
+```{r 4}
+plotList2(c(
+  paste('tmp', 'M013', 'remove_outliers.1.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'M047', 'remove_outliers.3.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'M173', 'remove_outliers.4.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P008', 'remove_outliers.6.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P016', 'remove_outliers.1.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P033', 'remove_outliers.3.vcf.calls.tsv', sep = '/'),
+  paste('tmp', 'P034', 'remove_outliers.4.vcf.calls.tsv', sep = '/')
+))
+```
+
